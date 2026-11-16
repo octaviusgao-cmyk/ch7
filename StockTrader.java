@@ -5,8 +5,6 @@ import java.util.Scanner;
 
 public class StockTrader {
     public static void main(String[] args) throws FileNotFoundException {
-       
-
         Scanner in = new Scanner(new File("sp500_1990_2025.txt"));
         String symbol = in.next();
         int n = in.nextInt();
@@ -19,6 +17,14 @@ public class StockTrader {
         loadData(in, year, month, price);
         int low = indexOfLowest(price);
         int hi = indexOfHighest(price);
+        
+        System.out.printf("%s lowest: $%.2f in %s %d%n", symbol, price[low], 
+			monthName(month[low]), year[hi]);
+		System.out.printf("%s highest: $%.2f in %s %d%n",symbol, price[hi], 
+			monthName(month[hi]), year[hi]);
+        
+        double result = simulate(year, month, price);
+        System.out.printf("Final value: $%, .2f%n", result);
 
         System.out.println(
             symbol + " lowest: $" + price[low] + " in " + monthName(month[low]) + " " + year[low]);
@@ -98,15 +104,52 @@ public class StockTrader {
         }
         return cash + shares * prices[prices.length - 1];
     }
-    
+
     public static final double START_CASH = 10000.0;
-	public static final double FEE = 10.0;
+    public static final double FEE = 10.0;
     public static String decide(double[] history, boolean holding, double boughtAt) {
-		return buyAndHold(history, holding, boughtAt);
+        return movingAverage(history, holding, boughtAt);
+    }
+
+    public static String buyAndHold(double[] history, boolean holding, double boughtAt) {
+        return "BUY";
+    }
+    public static String dipBuyer(double[] history, boolean holding, double boughtAt) {
+        int n = history.length;
+        double today = history[n - 1];
+
+        if (!holding) {
+            if (n >= 3 && today < history[n - 2] && history[n - 2] < history[n - 3]) {
+                return "BUY";
+            }
+        } else if (today >= boughtAt * 1.10) {
+			return "SELL";
+			}
+			return "HOLD";
+    }
+    
+
+	public static String movingAverage(double[] history, boolean holding, double boughtAt) {
+		if (history.length < 12) {
+			return "HOLD";
 		}
+		double today = history[history.length - 1];
+		double average = averageOfLast(history, 12);
 		
-	public static String buyAndHold(double[] history, boolean holding, double boughtAt) {
-		return "BUY";
+		if (!holding && today > average) {
+			return "BUY";
 		}
-	//public static String dipBuyer(double[] history, boolean holding, coublinb)
-}
+		if (holding && today < average) {
+			return "SELL"; 
+		}
+		return "HOLD";
+	}
+	public static double averageOfLast(double[] history, int count) {
+		double sum = 0.0;
+		for (int i = history.length - count; i < history.length; i++) {
+			sum += history[i];
+			}
+		return sum / count;
+		}
+	}
+	
