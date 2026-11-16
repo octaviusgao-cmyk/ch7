@@ -108,4 +108,5 @@ public class StockTrader {
 	public static String buyAndHold(double[] history, boolean holding, double boughtAt) {
 		return "BUY";
 		}
+	//public static String dipBuyer(double[] history, boolean holding, coublinb)
 }
